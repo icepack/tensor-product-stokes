@@ -45,6 +45,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--dimension', type=int, choices=[2, 3])
 parser.add_argument('--log-dx-min', type=int, default=2)
 parser.add_argument('--log-dx-max', type=int, default=5)
+parser.add_argument('--num-layers', type=int, default=1)
 parser.add_argument('--zdegree-min', type=int, default=1)
 parser.add_argument('--zdegree-max', type=int, default=6)
 parser.add_argument('--output')
@@ -81,12 +82,12 @@ elif args.dimension == 3:
         stability_constants = []
         for N in tqdm.trange(2**args.log_dx_min, 2**args.log_dx_max + 1):
             mesh2d = firedrake.UnitSquareMesh(N, N, diagonal='crossed')
-            mesh = firedrake.ExtrudedMesh(mesh2d, 1)
+            mesh = firedrake.ExtrudedMesh(mesh2d, args.num_layers)
             d = mesh.topological_dimension()
             volume = assemble(firedrake.Constant(1) * dx(mesh))
             l = firedrake.Constant(volume ** (1 / d))
 
-            V = firedrake.VectorFunctionSpace(mesh, 'CG', 2, vfamily='GL', vdegree=k + 1)
+            V = firedrake.VectorFunctionSpace(mesh, 'CG', 2, vfamily='GLL', vdegree=k + 1)
             Q = firedrake.FunctionSpace(mesh, 'CG', 1, vfamily='GL', vdegree=k)
             try:
                 b = lambda v, q: -q * div(v) * dx
