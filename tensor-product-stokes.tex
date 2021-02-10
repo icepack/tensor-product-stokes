@@ -1,0 +1,82 @@
+\documentclass{article}
+
+\usepackage{amsmath}
+%\usepackage{amsfonts}
+\usepackage{amsthm}
+%\usepackage{amssymb}
+%\usepackage{mathrsfs}
+%\usepackage{fullpage}
+%\usepackage{mathptmx}
+%\usepackage[varg]{txfonts}
+\usepackage{color}
+\usepackage[charter]{mathdesign}
+\usepackage[pdftex]{graphicx}
+%\usepackage{float}
+%\usepackage{hyperref}
+%\usepackage[modulo, displaymath, mathlines]{lineno}
+%\usepackage{setspace}
+%\usepackage[titletoc,toc,title]{appendix}
+\usepackage{natbib}
+
+%\linenumbers
+%\doublespacing
+
+\theoremstyle{definition}
+\newtheorem*{defn}{Definition}
+\newtheorem*{exm}{Example}
+
+\theoremstyle{plain}
+\newtheorem*{thm}{Theorem}
+\newtheorem*{lem}{Lemma}
+\newtheorem*{prop}{Proposition}
+\newtheorem*{cor}{Corollary}
+
+\newcommand{\argmin}{\text{argmin}}
+\newcommand{\ud}{\hspace{2pt}\mathrm{d}}
+\newcommand{\bs}{\boldsymbol}
+\newcommand{\PP}{\mathsf{P}}
+\let\divsymb=\div % rename builtin command \div to \divsymb
+\renewcommand{\div}[1]{\operatorname{div} #1} % for divergence
+\newcommand{\Id}[1]{\operatorname{Id} #1}
+
+\title{Tensor product elements for the Stokes equations}
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+In this paper we'll examine finite element discretizations of the Stokes equations on \emph{extruded meshes}.
+We're especially interested in domains with a high aspect ratio, or \emph{thin-film} flows.
+For example, terrestrial glacier flows have horizontal length scales on the order of hundreds of kilometers or more, and vertical length scales on the order of 1 km.
+These kinds of flows are typically very smooth in the vertical dimension and can often be transformed into terrain-following coordinates.
+For velocity fields that are very smooth in the vertical, it may be more computationally efficient to discretize using high-degree vertical basis functions in one vertical layer than it is to use many vertical layers with low-degree basis functions.
+Finally, the use of high-degree basis functions in the vertical suggests using a p-multigrid scheme.
+
+To our knowledge, the LBB-stability of tensor product elements with high-degree polynomial vertical basis functions has not been established in the computational fluid dynamics literature.
+\citet{canuto1984combined} established the LBB-stability of a basis using the tensor product of the MINI element in the horizontal direction and a Fourier basis with an equal number of modes for the velocity and pressure in the vertical direction.
+\citet{nakahashi1989finite} studied prismatic elements for the Navier-Stokes equations but did not address LBB stability.
+
+To prove the LBB-stability of tensor product elements for the Stokes equations, we'll try to reduce this problem the stability of the horizontal and vertical elements for the 2D and 1D Stokes problem respectively.
+We'll start by writing the divergence operator on an extruded domain in a revealing way.
+Let $\div$ be the usual 3D divergence operator, and $\div_x$ and $\div_z$ the divergence operators on 2D and 1D vector fields respectively, and $\Id_x$, $\Id_z$ the identity operators.
+(The 1D divergence operator is trivially just differentiation in the $z$-direction.)
+Finally, let $\Pi_x$ be the operator that takes a 3D vector field to its two horizontal components and $\Pi_z$ to its vertical component.
+Then we can write the full 3D divergence operator as a sum of tensor products of operators:
+\begin{equation}
+    \div = (\div_x \otimes \Id_z)\circ\Pi_x + (\Id_x \otimes \div_z)\circ\Pi_z
+\end{equation}
+\textbf{Then a miracle occurs.}
+
+A useful fact:
+\begin{equation}
+    \|T_1 \otimes T_2\| = \|T_1\|\cdot\|T_2\|
+\end{equation}
+
+\pagebreak
+
+\bibliographystyle{plainnat}
+\bibliography{tensor-product-stokes.bib}
+
+\end{document}
