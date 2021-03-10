@@ -58,6 +58,14 @@ To our knowledge, the LBB-stability of tensor product elements with high-degree 
 \citet{canuto1984combined} established the LBB-stability of a basis using the tensor product of the MINI element in the horizontal direction and a Fourier basis with an equal number of modes for the velocity and pressure in the vertical direction.
 \citet{nakahashi1989finite} studied prismatic elements for the Navier-Stokes equations but did not address LBB stability.
 
+We propose to use the velocity and pressure spaces
+\begin{align}
+    V & = \{\text{CG}_2 \otimes \text{GLL}_{k + 1}\}^3 \\
+    Q & = \text{CG}_1 \otimes \text{GL}_k.
+\end{align}
+CG denotes the usual continuous Lagrange basis, while GLL and GL are respectively the continuous Gauss-Lobatto-Legendre and discontinuous Gauss-Lobatto bases on intervals.
+Alternatively, one could use the MINI or other stable element in the horizontal.
+
 To prove the LBB-stability of tensor product elements for the Stokes equations, we'll try to reduce this problem the stability of the horizontal and vertical elements for the 2D and 1D Stokes problem respectively.
 We'll start by writing the divergence operator on an extruded domain in a revealing way.
 Let $\div$ be the usual 3D divergence operator, and $\div_x$ and $\div_z$ the divergence operators on 2D and 1D vector fields respectively, and $\Id_x$, $\Id_z$ the identity operators.
