@@ -77,10 +77,19 @@ Then we can write the full 3D divergence operator as a sum of tensor products of
 \end{equation}
 \textbf{Then a miracle occurs.}
 
-A useful fact:
+\textbf{A useful fact}:
 \begin{equation}
     \|T_1 \otimes T_2\| = \|T_1\|\cdot\|T_2\|
 \end{equation}
+
+\textbf{Probably the way it will go?}
+We can prove that the inf-sup condition holds for tensor product elements if there exists an operator $\Pi_h : V \to V_h$ such that, for all $q$ in $Q_h$,
+\begin{equation}
+    \langle B(v - \Pi_hv), q\rangle = 0
+\end{equation}
+and such that $\|\Pi_hv\| \le C\|v\|$.
+First, suppose that there are such operators $\Pi_x$, $\Pi_z$ for $\div_x$, $\div_z$.
+\textbf{Now what...}
 
 \pagebreak
 
