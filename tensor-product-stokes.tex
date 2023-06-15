@@ -51,11 +51,30 @@ In this paper we'll examine finite element discretizations of the Stokes equatio
 We're especially interested in domains with a high aspect ratio, or \emph{thin-film} flows.
 For example, terrestrial glacier flows have horizontal length scales on the order of hundreds of kilometers or more, and vertical length scales on the order of 1 km.
 These kinds of flows are typically very smooth in the vertical dimension and can often be transformed into terrain-following coordinates.
-For velocity fields that are very smooth in the vertical, it may be more computationally efficient to discretize using high-degree vertical basis functions in one vertical layer than it is to use many vertical layers with low-degree basis functions.
+The computational domain becomes the Cartesian product of a 2D footprint $\Omega$ and the unit interval $[0, 1]$.
+For velocity fields that are very smooth in the vertical, it may be more computationally efficient to discretize using high-degree vertical basis functions in a single vertical layer than it is to use many vertical layers with low-degree basis functions.
 Finally, the use of high-degree basis functions in the vertical suggests using a p-multigrid scheme.
 
+In the following, we will express the Stokes equations as a constrained optimization problem.
+The solution $u$, $p$ is a critical point of the \emph{Lagrangian}
+\begin{equation}
+    L(u, p) = \frac{1}{2}\langle Au, u\rangle - \langle f, u\rangle + \langle Bu - g, p\rangle
+\end{equation}
+where $A : V \to V^*$ and $B : V \to Q^*$ are bounded linear operators and $A$ is symmetric and positive-definite on the kernel of $B$.
+The crucial point we need to prove is that the basis functions that we choose for the velocity and pressure satisfy the \emph{Ladyzhenskaya-Babu\v{s}ka-Brezzi} (LBB) or \emph{inf-sup} condition:
+\begin{equation}
+    \inf_{q\in Q_h}\sup_{v \in V_h}\frac{\langle Bv, q\rangle}{\|v\|_{V_h}\|q\|_{Q_h}} \ge \beta > 0
+\end{equation}
+for some $\beta$ that is independent of $h$.
+Another way of stating this condition is that
+\begin{equation}
+    \|B^*q\|_{Q_h^*} \ge \beta\|q\|_{Q_h}
+\end{equation}
+for all $q$ in $Q_h$, where the norm on the left-hand side is an operator norm in the dual space $Q_h^*$.
+This latter condition is another way of saying that $B^*$ has a bounded inverse map and that the operator norm of $B^{-*}$ is less than $\beta^{-1}$.
 To our knowledge, the LBB-stability of tensor product elements with high-degree polynomial vertical basis functions has not been established in the computational fluid dynamics literature.
 \citet{canuto1984combined} established the LBB-stability of a basis using the tensor product of the MINI element in the horizontal direction and a Fourier basis with an equal number of modes for the velocity and pressure in the vertical direction.
+Their proof of LBB-stability crucially relied on special properties of the Fourier basis and does not generalize to other element families.
 \citet{nakahashi1989finite} studied prismatic elements for the Navier-Stokes equations but did not address LBB stability.
 
 We propose to use the velocity and pressure spaces
@@ -64,32 +83,48 @@ We propose to use the velocity and pressure spaces
     Q & = \text{CG}_1 \otimes \text{GL}_k.
 \end{align}
 CG denotes the usual continuous Lagrange basis, while GLL and GL are respectively the continuous Gauss-Lobatto-Legendre and discontinuous Gauss-Lobatto bases on intervals.
-Alternatively, one could use the MINI or other stable element in the horizontal.
+Alternatively, one could use the MINI element or other horizontal bases that are stable for the 2D Stokes equations.
 
 To prove the LBB-stability of tensor product elements for the Stokes equations, we'll try to reduce this problem the stability of the horizontal and vertical elements for the 2D and 1D Stokes problem respectively.
 We'll start by writing the divergence operator on an extruded domain in a revealing way.
 Let $\div$ be the usual 3D divergence operator, and $\div_x$ and $\div_z$ the divergence operators on 2D and 1D vector fields respectively, and $\Id_x$, $\Id_z$ the identity operators.
 (The 1D divergence operator is trivially just differentiation in the $z$-direction.)
-Finally, let $\Pi_x$ be the operator that takes a 3D vector field to its two horizontal components and $\Pi_z$ to its vertical component.
+Finally, let $\Psi_x$ be the operator that takes a 3D vector field to its two horizontal components and $\Psi_z$ to its vertical component.
 Then we can write the full 3D divergence operator as a sum of tensor products of operators:
 \begin{equation}
-    \div = (\div_x \otimes \Id_z)\circ\Pi_x + (\Id_x \otimes \div_z)\circ\Pi_z
+    \div = (\div_x \otimes \Id_z)\circ\Psi_x + (\Id_x \otimes \div_z)\circ\Psi_z
+    \label{eq:divergence-breakdown}
 \end{equation}
-\textbf{Then a miracle occurs.}
+This decomposition will be essential in deriving a compatible interpolation operator.
 
-\textbf{A useful fact}:
+We can prove that the inf-sup condition holds for tensor product elements if there exists an operator $\Pi^h : V \to V^h$ such that, for all $q$ in $Q^h$,
 \begin{equation}
-    \|T_1 \otimes T_2\| = \|T_1\|\cdot\|T_2\|
+    \langle \div(v - \Pi^hv), q\rangle = 0
 \end{equation}
-
-\textbf{Probably the way it will go?}
-We can prove that the inf-sup condition holds for tensor product elements if there exists an operator $\Pi_h : V \to V_h$ such that, for all $q$ in $Q_h$,
+and such that $\|\Pi^hv\| \le C\|v\|$.
+We'll need to take advantage of some special structure of the space we're using.
+The horizontal velocity space $V_x$ can be written as $W \times W$ for some function space $W$.
+Then the full 3D velocity space can be written as
 \begin{equation}
-    \langle B(v - \Pi_hv), q\rangle = 0
+    V = (W \otimes V_z)^3 \cong \underbrace{(V_x \otimes V_z)}_{\text{horizontal}} \times \underbrace{(W \otimes Z)}_{\text{vertical}} \cong (W^2 \otimes V_z) \times (W \otimes V_z)
 \end{equation}
-and such that $\|\Pi_hv\| \le C\|v\|$.
-First, suppose that there are such operators $\Pi_x$, $\Pi_z$ for $\div_x$, $\div_z$.
-\textbf{Now what...}
+Now suppose that there is a $\div_x$-compatible interpolation operator $\Pi^h_x$ that maps $V_x = W \times W$ into $V^h_x = W^h \times W^h$ and likewise a $\div_z$-compatible interpolation operator from $V_z$ into $V_z^h$.
+Finally, we'll assume there is a bounded interpolation operator $\Pi_w$ from $W$ to $W^h$ but with no assumption on compatibility.
+We claim that the operator
+\begin{equation}
+    \Pi^h = \Psi_x^*\circ(\Pi_x\otimes\Pi_z)\circ\Psi_x + \Psi_z^*\circ(\Pi_w\otimes\Pi_z)\circ\Psi_z
+\end{equation}
+is compatible for the 3D divergence operator as expressed in equation \eqref{eq:divergence-breakdown}.
+To see why this is so, observe first that $\Psi_z\Psi_x^* = \Psi_x\Psi_z^* = 0$ and that $\Psi_x^*\Psi_x + \Psi_z^*\Psi_z = \Id$.
+We then have that
+\begin{equation}
+    v - \Pi^h v = \Psi_x^*(\Id - \Pi_x\otimes\Pi_z)\Psi_x v + \Psi_z^*(\Id - \Pi_w\otimes\Pi_z)\Psi_z v
+\end{equation}
+and then
+\begin{align}
+    \div(v - \Pi_h v) & = \left(\div_x\otimes\Id_z\cdot\Psi_x + \Id_x\otimes\div_z\cdot\Psi_z\right)(v - \Pi_h v) \\
+    & = \div_x\otimes\Id_z(\Id - \Pi_x\otimes\Pi_z)\Psi_x v + \Id_x\otimes\div_z(\Id - \Pi_w\otimes\Pi_z)\Psi_z v
+\end{align}
 
 \pagebreak
 
