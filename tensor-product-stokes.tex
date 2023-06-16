@@ -51,11 +51,30 @@ In this paper we'll examine finite element discretizations of the Stokes equatio
 We're especially interested in domains with a high aspect ratio, or \emph{thin-film} flows.
 For example, terrestrial glacier flows have horizontal length scales on the order of hundreds of kilometers or more, and vertical length scales on the order of 1 km.
 These kinds of flows are typically very smooth in the vertical dimension and can often be transformed into terrain-following coordinates.
-For velocity fields that are very smooth in the vertical, it may be more computationally efficient to discretize using high-degree vertical basis functions in one vertical layer than it is to use many vertical layers with low-degree basis functions.
+The computational domain becomes the Cartesian product of a 2D footprint $\Omega$ and the unit interval $[0, 1]$.
+For velocity fields that are very smooth in the vertical, it may be more computationally efficient to discretize using high-degree vertical basis functions in a single vertical layer than it is to use many vertical layers with low-degree basis functions.
 Finally, the use of high-degree basis functions in the vertical suggests using a p-multigrid scheme.
 
+In the following, we will express the Stokes equations as a constrained optimization problem.
+The solution $u$, $p$ is a critical point of the \emph{Lagrangian}
+\begin{equation}
+    L(u, p) = \frac{1}{2}\langle Au, u\rangle - \langle f, u\rangle + \langle Bu - g, p\rangle
+\end{equation}
+where $A : V \to V^*$ and $B : V \to Q^*$ are bounded linear operators and $A$ is symmetric and positive-definite on the kernel of $B$.
+The crucial point we need to prove is that the basis functions that we choose for the velocity and pressure satisfy the \emph{Ladyzhenskaya-Babu\v{s}ka-Brezzi} (LBB) or \emph{inf-sup} condition:
+\begin{equation}
+    \inf_{q\in Q_h}\sup_{v \in V_h}\frac{\langle Bv, q\rangle}{\|v\|_V\|q\|_Q} \ge \beta > 0
+\end{equation}
+for some $\beta$ that is independent of $h$.
+Another way of stating this condition is that
+\begin{equation}
+    \|B^*q\|_{V^*} \ge \beta\|q\|_Q
+\end{equation}
+for all $q$ in $Q_h$, where the norm on the left-hand side is an operator norm in the dual space $Q_h^*$.
+This latter condition is another way of saying that $B^*$ has a bounded inverse map and that the operator norm of $B^{-*}$ is less than $\beta^{-1}$.
 To our knowledge, the LBB-stability of tensor product elements with high-degree polynomial vertical basis functions has not been established in the computational fluid dynamics literature.
 \citet{canuto1984combined} established the LBB-stability of a basis using the tensor product of the MINI element in the horizontal direction and a Fourier basis with an equal number of modes for the velocity and pressure in the vertical direction.
+Their proof of LBB-stability crucially relied on special properties of the Fourier basis and does not generalize to other element families.
 \citet{nakahashi1989finite} studied prismatic elements for the Navier-Stokes equations but did not address LBB stability.
 
 We propose to use the velocity and pressure spaces
@@ -64,32 +83,7 @@ We propose to use the velocity and pressure spaces
     Q_h & = \text{CG}_1 \otimes \text{GL}_k.
 \end{align}
 CG denotes the usual continuous Lagrange basis, while GLL and GL are respectively the continuous Gauss-Lobatto-Legendre and discontinuous Gauss-Lobatto bases on intervals.
-Alternatively, one could use the MINI or other stable element in the horizontal.
-In the following we'll need to use decompositions of the velocity space into horizontal and vertical components.
-For our proofs to go, we have to assume that the velocity space $V$ has the structure
-\begin{equation}
-    V = W^3 \otimes V^z
-\end{equation}
-where $W$ is some scalar space defined on the footprint domain $\Omega$ and $V^z$ is a scalar space defined on $[0, 1]$.
-We likewise have to assume that the discrete spaces satisfy a similar relation:
-\begin{equation}
-    V_h = W_h^3 \otimes V_h^z.
-\end{equation}
-This assumption holds for certain discretizations but not others.
-For example, the Taylor-Hood and MINI spaces can be written as the Cartesian product of scalar spaces, while the Raviart-Thomas, Brezzi-Douglas-Marini, and Crouzeix-Raviart spaces cannot.
-The reason that we make this assumption is that we will need to express the velocity space as a Cartesian product of a horizontal and a vertical part:
-\begin{align}
-    V & \cong \underbrace{(V^x \otimes V^z)}_{\text{horizontal}} \times \underbrace{(W \otimes V^z)}_{\text{vertical}} \\
-    & \cong (W^2\otimes V^z) \times (W \otimes V^z)
-    \label{eq:space-decomposition}
-\end{align}
-Let $\Psi_x : V \to V^x\otimes V^z$ and $\Psi_z : V \to W \otimes V^z$ be the operators that project onto the horizontal and vertical components of the velocity field respectively.
-Note that $\Psi_x$ and $\Psi_z$ are mutually orthogonal projection operators:
-\begin{align}
-    \Psi_x\cdot\Psi_z^* = \Psi_z\cdot\Psi_x^* & = 0, \label{eq:orthogonal-projection} \\
-    \Psi_x^*\cdot\Psi_x + \Psi_z^*\cdot\Psi_z & = \Id.
-\end{align}
-Finally, for the pressure space, we only need that $Q_h = Q_h^x\otimes Q_h^z$.
+Alternatively, one could use the MINI element or other horizontal bases that are stable for the 2D Stokes equations.
 
 The Stokes equations can be written as a constrained optimization problem.
 The velocity and pressure that solve the Stokes equations are a critical point of the Lagrangian
@@ -107,53 +101,42 @@ for some $\beta > 0$ independent of $h$, but not every choice of velocity-pressu
 (This is to be contrasted to other problems with a similar form, such as mixed Poisson, where the obstruction is instead a failure of coercivity of the $A$ operator.)
 To prove the LBB-stability of tensor product elements for the Stokes equations, we will assume that we have pairs of discrete spaces $(V_h^x, Q_h^x) \subset (V^x, Q^x)$ and $(V_h^z, Q_h^z) \subset (V^z, Q^z)$ for which the inf-sup condition \eqref{eq:inf-sup} holds respectively for the horizontal and vertical divergence operators $\div_x : V^x \to Q^x$, $\div_z : V^z \to Q^z$.
 (The 1D divergence operator is trivially just differentiation in the $z$-direction.)
-To use the space decomposition in equation \eqref{eq:space-decomposition}, we'll express the divergence operator in terms of how it acts on the horizontal and vertical spaces.
-Let $\Id_{V^x}$, $\Id_{V^z}$, $\Id_W$ the identity operators on $V^x$, $V^z$, and $W$ respectively.
+Finally, let $\Psi_x$ be the operator that takes a 3D vector field to its two horizontal components and $\Psi_z$ to its vertical component.
 Then we can write the full 3D divergence operator as a sum of tensor products of operators:
 \begin{equation}
-    \div = (\div_x \otimes \Id_{V^z})\cdot\Psi_x + (\Id_W \otimes \div_z)\cdot\Psi_z
-    \label{eq:divergence}
+    \div = (\div_x \otimes \Id_z)\circ\Psi_x + (\Id_x \otimes \div_z)\circ\Psi_z
+    \label{eq:divergence-breakdown}
 \end{equation}
-This is the key identity that will allow the rest of the proofs to work in the following.
+This decomposition will be essential in deriving a compatible interpolation operator.
 
-A common strategy for proving the stability of a discretization for a mixed problem is to show that a \emph{$B$-compatible interpolation operator} exists.
-A $B$-compatible interpolation operator is a map $\Pi_h : V \to V_h$ such that, for all $q$ in $Q_h$,
+We can prove that the inf-sup condition holds for tensor product elements if there exists an operator $\Pi^h : V \to V^h$ such that, for all $q$ in $Q^h$,
 \begin{equation}
-    \langle B(v - \Pi_hv), q\rangle = 0
+    \langle \div(v - \Pi^hv), q\rangle = 0
 \end{equation}
-and such that $\|\Pi_hv\| \le C\|v\|$ where the constant $C$ is independent of $h$.
-First, suppose that there are such operators $\Pi_x$, $\Pi_z$ for $\div_x$, $\div_z$, and let $\Pi_w$ be an arbitrary bounded interpolation operator into the scalar space $W_h$.
-We claim that the compatible interpolation operator for the full 3D divergence is
+and such that $\|\Pi^hv\| \le C\|v\|$.
+We'll need to take advantage of some special structure of the space we're using.
+The horizontal velocity space $V_x$ can be written as $W \times W$ for some function space $W$.
+Then the full 3D velocity space can be written as
 \begin{equation}
-    \Pi_h = \Psi_x^*\cdot\Pi_x\otimes\Pi_z\cdot\Psi_x + \Psi_z^*\cdot\Pi_w\otimes\Pi_z\cdot\Psi_z.
-    \label{eq:pi-h}
+    V = (W \otimes V_z)^3 \cong \underbrace{(V_x \otimes V_z)}_{\text{horizontal}} \times \underbrace{(W \otimes Z)}_{\text{vertical}} \cong (W^2 \otimes V_z) \times (W \otimes V_z)
 \end{equation}
-Before proceeding, we note to useful facts.
-First, the norm of a tensor product of operators is the product of the norms:
+Now suppose that there is a $\div_x$-compatible interpolation operator $\Pi^h_x$ that maps $V_x = W \times W$ into $V^h_x = W^h \times W^h$ and likewise a $\div_z$-compatible interpolation operator from $V_z$ into $V_z^h$.
+Finally, we'll assume there is a bounded interpolation operator $\Pi_w$ from $W$ to $W^h$ but with no assumption on compatibility.
+We claim that the operator
 \begin{equation}
-    \|T_1 \otimes T_2\| = \|T_1\|\cdot\|T_2\|.
+    \Pi^h = \Psi_x^*\circ(\Pi_x\otimes\Pi_z)\circ\Psi_x + \Psi_z^*\circ(\Pi_w\otimes\Pi_z)\circ\Psi_z
 \end{equation}
-This together with the triangle inequality implies that $\Pi_h$ is bounded with norm independent of $h$ if $\Pi_x$, $\Pi_z$, and $\Pi_w$ are.
-Second, operator product distributes over tensor product:
+is compatible for the 3D divergence operator as expressed in equation \eqref{eq:divergence-breakdown}.
+To see why this is so, observe first that $\Psi_z\Psi_x^* = \Psi_x\Psi_z^* = 0$ and that $\Psi_x^*\Psi_x + \Psi_z^*\Psi_z = \Id$.
+We then have that
 \begin{equation}
-    (S_1 \otimes S_2) \cdot (T_1 \otimes T_2) = (S_1 \cdot T_1) \otimes (S_2 \cdot T_2).
-    \label{eq:operator-tensor-product}
+    v - \Pi^h v = \Psi_x^*(\Id - \Pi_x\otimes\Pi_z)\Psi_x v + \Psi_z^*(\Id - \Pi_w\otimes\Pi_z)\Psi_z v
 \end{equation}
-To show that $\Pi_h$ is compatible for the 3D divergence operator, we'll first look at how the interpolation error decomposes in the horizontal and vertical directions respectively using equations \eqref{eq:orthogonal-projection}:
+and then
 \begin{align}
-    v - \Pi_h v & = (\Psi_x^*\cdot\Psi_x + \Psi_z^*\cdot\Psi_z - \Pi_h) v \\
-    & = \Psi_x^*\cdot(\Id_{V^x}\otimes\Id_{V^z} - \Pi_x\otimes\Pi_z)\cdot\Psi_xv \nonumber \\
-    & \qquad + \Psi_z^*\cdot(\Id_W\otimes\Id_{V^z} - \Pi_w\otimes\Pi_z)\cdot\Psi_zv
+    \div(v - \Pi_h v) & = \left(\div_x\otimes\Id_z\cdot\Psi_x + \Id_x\otimes\div_z\cdot\Psi_z\right)(v - \Pi_h v) \\
+    & = \div_x\otimes\Id_z(\Id - \Pi_x\otimes\Pi_z)\Psi_x v + \Id_x\otimes\div_z(\Id - \Pi_w\otimes\Pi_z)\Psi_z v
 \end{align}
-Now if we take the divergence of the expression above using the decomposition of equation \eqref{eq:divergence} we'll find that several cross-terms are zero because of equation \eqref{eq:orthogonal-projection}:
-\begin{align}
-    \div(v - \Pi_h v) & = \div_x\otimes \Id_{V^z}\cdot(\Id_{V^x}\otimes\Id_{V^z} - \Pi_x\otimes\Pi_z)\cdot\Psi_xv \nonumber \\
-    & \qquad + \Id_W\otimes\div_z\cdot(\Id_W\otimes\Id_{V^z} - \Pi_w\otimes\Pi_z)\cdot\Psi_zv
-\end{align}
-\textcolor{red}{Then a miracle occurs.
-I think we need to add zero in a clever way so that we can factor everything using equation \eqref{eq:operator-tensor-product}.
-Then we'll use the compatibility of the $x$ and $z$ operators.}
-
 
 \pagebreak
 
