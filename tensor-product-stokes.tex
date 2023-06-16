@@ -63,12 +63,12 @@ The solution $u$, $p$ is a critical point of the \emph{Lagrangian}
 where $A : V \to V^*$ and $B : V \to Q^*$ are bounded linear operators and $A$ is symmetric and positive-definite on the kernel of $B$.
 The crucial point we need to prove is that the basis functions that we choose for the velocity and pressure satisfy the \emph{Ladyzhenskaya-Babu\v{s}ka-Brezzi} (LBB) or \emph{inf-sup} condition:
 \begin{equation}
-    \inf_{q\in Q_h}\sup_{v \in V_h}\frac{\langle Bv, q\rangle}{\|v\|_{V_h}\|q\|_{Q_h}} \ge \beta > 0
+    \inf_{q\in Q_h}\sup_{v \in V_h}\frac{\langle Bv, q\rangle}{\|v\|_V\|q\|_Q} \ge \beta > 0
 \end{equation}
 for some $\beta$ that is independent of $h$.
 Another way of stating this condition is that
 \begin{equation}
-    \|B^*q\|_{Q_h^*} \ge \beta\|q\|_{Q_h}
+    \|B^*q\|_{V^*} \ge \beta\|q\|_Q
 \end{equation}
 for all $q$ in $Q_h$, where the norm on the left-hand side is an operator norm in the dual space $Q_h^*$.
 This latter condition is another way of saying that $B^*$ has a bounded inverse map and that the operator norm of $B^{-*}$ is less than $\beta^{-1}$.
