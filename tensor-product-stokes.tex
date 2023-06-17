@@ -26,10 +26,11 @@
 \newtheorem*{exm}{Example}
 
 \theoremstyle{plain}
-\newtheorem*{thm}{Theorem}
-\newtheorem*{lem}{Lemma}
-\newtheorem*{prop}{Proposition}
-\newtheorem*{cor}{Corollary}
+\newtheorem{thm}{Theorem}
+\newtheorem{lem}{Lemma}
+\newtheorem{prop}{Proposition}
+\newtheorem{cor}{Corollary}
+\newtheorem{asm}{Assumption}
 
 \newcommand{\argmin}{\text{argmin}}
 \newcommand{\ud}{\hspace{2pt}\mathrm{d}}
@@ -40,103 +41,227 @@
 \newcommand{\Id}[1]{\operatorname{Id} #1}
 
 \title{Tensor product elements for the Stokes equations}
-\author{}
+\author{Daniel R. Shapero}
 \date{}
 
 \begin{document}
 
 \maketitle
 
-In this paper we'll examine finite element discretizations of the Stokes equations on \emph{extruded meshes}.
-We're especially interested in domains with a high aspect ratio, or \emph{thin-film} flows.
-For example, terrestrial glacier flows have horizontal length scales on the order of hundreds of kilometers or more, and vertical length scales on the order of 1 km.
-These kinds of flows are typically very smooth in the vertical dimension and can often be transformed into terrain-following coordinates.
-The computational domain becomes the Cartesian product of a 2D footprint $\Omega$ and the unit interval $[0, 1]$.
-For velocity fields that are very smooth in the vertical, it may be more computationally efficient to discretize using high-degree vertical basis functions in a single vertical layer than it is to use many vertical layers with low-degree basis functions.
-Finally, the use of high-degree basis functions in the vertical suggests using a p-multigrid scheme.
+% --------------------
+\section{Introduction}
 
-In the following, we will express the Stokes equations as a constrained optimization problem.
-The solution $u$, $p$ is a critical point of the \emph{Lagrangian}
+The goals of this paper are (1) to prove the inf-sup stability of certain finite element discretizations of the Stokes equations on \emph{extruded domains} in $\mathbb{R}^3$ and (2) to demonstrate the use of these elements on several real problems.
+An extruded domain $\Omega$ is one that is obtainable as a mapping of the Cartesian product of a \emph{footprint} domain $\Phi$ in $\mathbb{R}^2$ with the unit interval $[0, 1]$.
+We might not have that $\Omega = \Phi \times [0, 1]$ exactly, but rather that $\Omega$ is obtainable by applying some vertical stretching transformation to the final coordinate.
+For example, we can get such domains by using \emph{terrain-following} coordinates.
+
+Extruded domains are very common in the geophysical sciences.
+For example, flow in the ocean, atmosphere, and of large ice sheets can all be described as extruded domains.
+Moreover all of these systems are \emph{thin-film} flows, where the horizontal length scales are much larger than the vertical length scales by a factor of 20 or more.
+These kinds of flows are often very smooth in the vertical dimension, and it may be more computationally efficient to discretize a problem using high-degree vertical basis functions in only a few layers than it is to use many vertical layers with low-degree basis functions.
+
+In the following, we will express the Stokes equations as a linearly-constrained quadratic minimization problem.
+Let $V$ and $Q$ be Hilbert spaces, $A : V \to V^*$ and $B : V \to Q^*$ bounded linear operators with $A$ symmetric and positive-definite.
+The general form of constrained optimization problem that we'll consider here is to find a critical point $u$, $p$ of the \emph{Lagrangian}
 \begin{equation}
-    L(u, p) = \frac{1}{2}\langle Au, u\rangle - \langle f, u\rangle + \langle Bu - g, p\rangle
+    L(u, p) = \frac{1}{2}\langle Au, u\rangle - \langle f, u\rangle + \langle Bu - g, p\rangle.
 \end{equation}
-where $A : V \to V^*$ and $B : V \to Q^*$ are bounded linear operators and $A$ is symmetric and positive-definite on the kernel of $B$.
-The crucial point we need to prove is that the basis functions that we choose for the velocity and pressure satisfy the \emph{Ladyzhenskaya-Babu\v{s}ka-Brezzi} (LBB) or \emph{inf-sup} condition:
+For the Stokes equations, these operators are
+\begin{equation}
+    \langle Au, v\rangle = \int_\Omega \mu\dot\varepsilon(u):\dot\varepsilon(v)\; dx
+\end{equation}
+where $\mu$ is the (strictly positive) viscosity coefficient and $\dot\varepsilon(u) \equiv \frac{1}{2}(\nabla u + \nabla u^*)$ is the strain rate tensor, and
+\begin{equation}
+    \langle Bv, q\rangle = \int_\Omega (\nabla\cdot v)\,q\;dx.
+\end{equation}
+The constraint that $Bu - g = 0$ enforces the physical condition that the fluid is incompressible or has prescribed sources of mass.
+
+We will consider shape-regular triangulations of the domain $\Omega$ with a maximum cell diameter $h$.
+Let $V_h$, $Q_h$ denote a pair of finite-dimensional subspaces of $V$ and $Q$ respectively.
+The crucial point we need to prove is that the approximation spaces we choose for the velocity and pressure satisfy the \emph{Ladyzhenskaya-Babu\v{s}ka-Brezzi} (LBB) or \emph{inf-sup} condition:
 \begin{equation}
     \inf_{q\in Q_h}\sup_{v \in V_h}\frac{\langle Bv, q\rangle}{\|v\|_V\|q\|_Q} \ge \beta > 0
 \end{equation}
-for some $\beta$ that is independent of $h$.
+for some $\beta$ that is independent of the mesh size $h$ \citep{boffi2013mixed}.
 Another way of stating this condition is that
 \begin{equation}
     \|B^*q\|_{V^*} \ge \beta\|q\|_Q
 \end{equation}
-for all $q$ in $Q_h$, where the norm on the left-hand side is an operator norm in the dual space $Q_h^*$.
-This latter condition is another way of saying that $B^*$ has a bounded inverse map and that the operator norm of $B^{-*}$ is less than $\beta^{-1}$.
-To our knowledge, the LBB-stability of tensor product elements with high-degree polynomial vertical basis functions has not been established in the computational fluid dynamics literature.
+for all $q$ in $Q_h$, where the norm on the left-hand side is an operator norm in the dual space $V^*$.
+This latter condition is another way of saying that $B^*$ has a bounded inverse map and that $\|B^{-*}\| \le \beta^{-1}$.
+
+\textbf{To our knowledge, the LBB-stability of tensor product elements with high-degree polynomial vertical basis functions has not been established in the computational fluid dynamics literature.}
 \citet{canuto1984combined} established the LBB-stability of a basis using the tensor product of the MINI element in the horizontal direction and a Fourier basis with an equal number of modes for the velocity and pressure in the vertical direction.
 Their proof of LBB-stability crucially relied on special properties of the Fourier basis and does not generalize to other element families.
 \citet{nakahashi1989finite} studied prismatic elements for the Navier-Stokes equations but did not address LBB stability.
 
-We propose to use the velocity and pressure spaces
-\begin{align}
-    V_h & = \{\text{CG}_2 \otimes \text{GLL}_{k + 1}\}^3 \\
-    Q_h & = \text{CG}_1 \otimes \text{GL}_k.
-\end{align}
-CG denotes the usual continuous Lagrange basis, while GLL and GL are respectively the continuous Gauss-Lobatto-Legendre and discontinuous Gauss-Lobatto bases on intervals.
-Alternatively, one could use the MINI element or other horizontal bases that are stable for the 2D Stokes equations.
+We propose to use velocity and pressure spaces for the 3D problem that are fashioned out of stable elements for the 2D problem.
+Certain choices of basis for the 2D problem will work, like the MINI and Taylor-Hood elements.
+Other element families, such as Raviart-Thomas or Crouzeix-Raviart, cannot be easily adapted into tensor product elements on extruded domains.
 
-The Stokes equations can be written as a constrained optimization problem.
-The velocity and pressure that solve the Stokes equations are a critical point of the Lagrangian
-\begin{equation}
-    L(u, p) = \frac{1}{2}\langle Au, u\rangle - \langle f, u\rangle - \langle Bu - g, p\rangle.
-\end{equation}
-In our case, $B$ is the 3D divergence operator and the pressure $p$ acts as a Lagrange multiplier to enforce the constraint that the velocity field is divergence-free.
-The key obstruction to LBB-stability for the Stokes equations is coercivity for the constraint operator $B$.
-We need that
-\begin{equation}
-    \inf_{q\in Q_h}\sup_{v\in V_h}\frac{\langle Bv, q\rangle}{\|v\|\cdot\|q\|} \ge \beta
-    \label{eq:inf-sup}
-\end{equation}
-for some $\beta > 0$ independent of $h$, but not every choice of velocity-pressure element pairs satisfies this condition.
-(This is to be contrasted to other problems with a similar form, such as mixed Poisson, where the obstruction is instead a failure of coercivity of the $A$ operator.)
-To prove the LBB-stability of tensor product elements for the Stokes equations, we will assume that we have pairs of discrete spaces $(V_h^x, Q_h^x) \subset (V^x, Q^x)$ and $(V_h^z, Q_h^z) \subset (V^z, Q^z)$ for which the inf-sup condition \eqref{eq:inf-sup} holds respectively for the horizontal and vertical divergence operators $\div_x : V^x \to Q^x$, $\div_z : V^z \to Q^z$.
-(The 1D divergence operator is trivially just differentiation in the $z$-direction.)
-Finally, let $\Psi_x$ be the operator that takes a 3D vector field to its two horizontal components and $\Psi_z$ to its vertical component.
-Then we can write the full 3D divergence operator as a sum of tensor products of operators:
-\begin{equation}
-    \div = (\div_x \otimes \Id_z)\circ\Psi_x + (\Id_x \otimes \div_z)\circ\Psi_z
-    \label{eq:divergence-breakdown}
-\end{equation}
-This decomposition will be essential in deriving a compatible interpolation operator.
 
-We can prove that the inf-sup condition holds for tensor product elements if there exists an operator $\Pi^h : V \to V^h$ such that, for all $q$ in $Q^h$,
+\section{Elements}
+
+To prove the inf-sup stability of tensor product elements for the Stokes equations on extruded domains, we will proceed through a more general route.
+Rather than start from the assumption that the domain is the product of a footprint domain in 2D and the unit interval, we will instead suppose that the domain $\Omega$ is equal to a product of domains $\Omega_x$ and $\Omega_z$ of arbitrary dimensions $d_x$ and $d_z$.
+We will refer to these as the ``horizontal'' and ``vertical'' domains respectively.
+Our approach can be summarized as building up stable elements on the product domain through a certain combination of stable elements on the factor domains.
+
+The key observation enabling the constructions that follow is that \textbf{the product structure of the spatial domain implies a certain product structure for the space of vector fields defined on that domain, and for the divergence operator.}
+To see how the spaces and operators can be decomposed, first define the pairs of spaces $V_x = H^1(\Omega_x, \mathbb{R}^{d_x})$, $Q_x = L^2(\Omega_x)$ of vector and scalar fields on the horizontal domain and likewise $V_z$, $Q_z$ for the vertical domain.
+Additionally, we let $S_x = H^1(\Omega_x)$ and $S_z = H^1(\Omega_z)$ be spaces of scalar fields on each product domain.
+\begin{lem} The Sobolev space $V = H^1(\Omega_x\times\Omega_z, \mathbb{R}^{d_x + d_z})$ of velocity fields on the product domain $\Omega_x \times \Omega_z$ can be decomposed as the direct sum of tensor products as follows:
 \begin{equation}
-    \langle \div(v - \Pi^hv), q\rangle = 0
+    V = \left(V_x \otimes S_z\right) \oplus \left(S_x \otimes V_z\right).
+    \label{eq:velocity-space-decomposition}
 \end{equation}
-and such that $\|\Pi^hv\| \le C\|v\|$.
-We'll need to take advantage of some special structure of the space we're using.
-The horizontal velocity space $V_x$ can be written as $W \times W$ for some function space $W$.
-Then the full 3D velocity space can be written as
+\end{lem}
+
+Knowing that $V$ can be written as a direct sum of tensor products, we can then ask how the divergence operator acts on each summand and factor.
+Define the operator $R_x : V \to V_x \otimes S_z$ that selects the horizontal components of the velocity field and likewise $R_z : V \to S_x\otimes V_z$ the operator that selects the vertical components.
+We then define their partial inverses, the injection operators $R_x^*$, $R_z^*$ from $V_x\otimes S_z$ or $S_x\otimes V_z$ into $V$ respectively.
+Let $\Id_H$ denote the identity map on a Hilbert space $H$.
+The key result that helps us construct stable elements for the Stokes problem is:
+\begin{lem} If $B : V \to Q^*$ is the divergence operator acting on the space of Sobolev vector fields on $\Omega_x\times\Omega_z$, then
 \begin{equation}
-    V = (W \otimes V_z)^3 \cong \underbrace{(V_x \otimes V_z)}_{\text{horizontal}} \times \underbrace{(W \otimes Z)}_{\text{vertical}} \cong (W^2 \otimes V_z) \times (W \otimes V_z)
+    B = (B_x \otimes \Id_{S_z})R_x + (\Id_{S_x}\otimes B_z)R_z.
+    \label{eq:b-decomposition}
 \end{equation}
-Now suppose that there is a $\div_x$-compatible interpolation operator $\Pi^h_x$ that maps $V_x = W \times W$ into $V^h_x = W^h \times W^h$ and likewise a $\div_z$-compatible interpolation operator from $V_z$ into $V_z^h$.
-Finally, we'll assume there is a bounded interpolation operator $\Pi_w$ from $W$ to $W^h$ but with no assumption on compatibility.
-We claim that the operator
+\end{lem}
+
+For example, the 3D divergence operator can be written as the sum of (1) a 2D divergence operator acting only on the horizontal components of the velocity field that ignores their dependence on the vertical coordinate and (2) a 1D divergence operator acting only on the vertical components that ignores their dependence on the horizontal coordinate.
+
+The above discussion has operated at the level of the idealized problem; we now proceed to the discretization.
+We can prove that the inf-sup condition holds for a pair $V^h$, $Q^h$ of discrete spaces if there exists a \emph{compatible interpolation operator} \citep{boffi2013mixed}.
+A $B$-compatible interpolation operator $\Pi^h$ is a linear operator from $V$ to $V^h$ such that, for all $v$ in $V$ and $q$ in $Q^h$,
 \begin{equation}
-    \Pi^h = \Psi_x^*\circ(\Pi_x\otimes\Pi_z)\circ\Psi_x + \Psi_z^*\circ(\Pi_w\otimes\Pi_z)\circ\Psi_z
+    \langle B(v - \Pi^hv), q\rangle = 0,
 \end{equation}
-is compatible for the 3D divergence operator as expressed in equation \eqref{eq:divergence-breakdown}.
-To see why this is so, observe first that $\Psi_z\Psi_x^* = \Psi_x\Psi_z^* = 0$ and that $\Psi_x^*\Psi_x + \Psi_z^*\Psi_z = \Id$.
-We then have that
+and $\|\Pi^hv\| \le C\|v\|$ where the constant $C$ is independent of the mesh size $h$.
+
+We now introduce two pairs of discrete spaces $V_x^h$, $Q_x^h$ and $V_z^h$, $Q_z^h$.
+We will also need two discrete spaces $S_x^h$, $S_z^h$ that discretize scalar fields in $S_x$ and $S_z$ respectively.
+We can then decompose the space of discrete velocity fields as follows:
 \begin{equation}
-    v - \Pi^h v = \Psi_x^*(\Id - \Pi_x\otimes\Pi_z)\Psi_x v + \Psi_z^*(\Id - \Pi_w\otimes\Pi_z)\Psi_z v
+    V^h = \left(V_x^h \otimes S_z^h\right)\oplus\left(S_x^h\otimes V_z^h\right)
 \end{equation}
-and then
-\begin{align}
-    \div(v - \Pi_h v) & = \left(\div_x\otimes\Id_z\cdot\Psi_x + \Id_x\otimes\div_z\cdot\Psi_z\right)(v - \Pi_h v) \\
-    & = \div_x\otimes\Id_z(\Id - \Pi_x\otimes\Pi_z)\Psi_x v + \Id_x\otimes\div_z(\Id - \Pi_w\otimes\Pi_z)\Psi_z v
-\end{align}
+by analogy with equation \eqref{eq:velocity-space-decomposition}.
+The final pieces are the following
+\begin{asm} There is a $B_x$-compatible interpolation operator $\Pi_x^h : V_x^h \to V_x$ and a $B_z$-compatible $\Pi_z^h : V_z^h \to V_z$.
+    \label{asm:b-compatible-operators}
+\end{asm}
+\begin{asm} There is an operator $\Psi_x^h : S_x \to S_x^h$ such that
+    \begin{equation}
+        \langle \phi - \Psi_x^h\phi, q\rangle = 0
+    \end{equation}
+    for all $\phi$ in $S_x$ and $q \in Q_x^h$ and likewise $\Psi_z^h : S_z \to S_z^h$, $Q_z^h$.
+    \label{asm:ortho-projection}
+\end{asm}
+
+This latter assumption holds if we can guarantee that the dimension of $S_\circ^h$ is greater than or equal to $Q_\circ^h$.
+In concrete examples, we will show cases where $Q_\circ^h \subset S_\circ^h$ and the assumption is guarantee trivially by taking $\Psi_\circ^h$ to be the orthogonal projection operator.
+Now all the pieces are in place to complete our construction.
+\begin{thm}\label{thm:main-theorem} The operator $\Pi^h : V \to V^h$ defined by
+\begin{equation}
+    \Pi^h = R_x^*(\Pi_x^h\otimes\Psi_z^h)R_x + R_z^*(\Psi_x^h\otimes\Pi_z^h)R_z
+\end{equation}
+    is $B$-compatible interpolation operator if $B$ has the structure of equation \eqref{eq:b-decomposition} and Assumptions \ref{asm:b-compatible-operators} and \ref{asm:ortho-projection} hold.
+    \proof First, observe that $R_x^*R_x + R_z^*R_z = \Id_V$.
+    We then have that
+    \begin{equation}
+        \Id_V - \Pi^h = R_x^*(\Id_{V_x}\otimes\Id_{S_z} - \Pi_x^h\otimes\Psi_z^h)R_x + R_z^*(\Id_{S_x}\otimes\Id_{V_z} - \Psi_x^h\otimes\Pi_z^h)R_z
+    \end{equation}
+    using the definition of $\Pi^h$.
+    Next, we'll need the fact that $R_zR_x^* = R_xR_z^* = 0$.
+    We can then compute
+    \begin{align}
+        B(\Id_V - \Pi^h) & = (B_x\otimes \Id_{S_z})(\Id_{V_x}\otimes\Id_{S_z} - \Pi_x\otimes\Psi_z)R_x \nonumber\\
+        & \qquad + (\Id_{S_x}\otimes B_z)(\Id_{S_x}\otimes\Id_{V_z} - \Psi_x\otimes\Pi_z)R_z \\
+        & = \left(B_x\otimes\Id_{S_z} - B_x\Pi_x\otimes\Psi_z\right)R_x \nonumber \\
+        & \qquad + (\Id_{S_x}\otimes B_z - \Psi_x\otimes B_z\Pi_z)R_z
+        \label{eq:b-id-pi}
+    \end{align}
+    where we have used that $(A_1\otimes A_2)\cdot(B_1\otimes B_2) = (A_1\cdot B_1)\otimes(A_2\cdot B_2)$.
+    Now we let $u$ be an element of $V$ and $q$ an element of $Q^h$.
+    We can assume that
+    \begin{equation}
+        v = \left(\begin{matrix}v_x(x)\phi_z(z) \\ \phi_x(x)v_z(z)\end{matrix}\right), \quad q = q_x(x)q_z(z)
+    \end{equation}
+    where $v_x \in V_x$, $\phi_z \in S_z$, $\phi_x \in S_x$, $v_z \in V_z$, and $q_x \in Q_x^h$, $q_z \in Q_z^h$.
+    We can extend to the general case by linearity and taking limits.
+    Substituting this into equation \eqref{eq:b-id-pi},
+    \begin{align}
+        \langle B(\Id_V - \Pi^h)v, q\rangle & = \langle(B_x\otimes\Id_{S_z} - B_x\Pi_x\otimes \Psi_z)(v_x\phi_z), q_x q_z\rangle \nonumber \\
+        & \qquad + \langle(\Id_{S_z}\otimes B_z - \Psi_x\otimes B_z\Pi_z)(\phi_xv_z), q_xq_z\rangle.
+        \label{eq:b-id-pi-vq}
+    \end{align}
+    Focusing just on the first term, we can distribute the tensor products of operators over those of functions:
+    \begin{align}
+        & \langle(B_x\otimes\Id_{S_z} - B_x\Pi_x\otimes \Psi_z)(v_x\phi_z), q_x q_z\rangle \nonumber\\
+        &\qquad = \langle (B_xv_x)\phi_z - (B_x\Pi_xv_x)(\Psi_z\phi_z), q_x q_z\rangle \nonumber\\
+        &\qquad = \langle B_xv_x, q_x\rangle\langle\phi_z, q_z\rangle - \langle B_x\Pi_xv_x, q_x\rangle\langle \Psi_z\phi_z, q_z\rangle \\
+        &\qquad = \langle B_xv_x, q_x\rangle\langle \phi_z - \Psi_z\phi_z, q_z\rangle \\
+        &\qquad = 0
+    \end{align}
+    where we apply the definition of inner products in the tensor product of spaces, the fact that $\Pi_x$ is $B_x$-compatible, and finally the Assumption \ref{asm:ortho-projection} for $\Psi_z$.
+    The same reasoning shows that the second term of equation \eqref{eq:b-id-pi-vq} is zero as well.\qed
+\end{thm}
+
+Now we can look at the case of interest to us, where $\Omega_x$ is a domain in $\mathbb{R}^2$ and $\Omega_z$ is the unit interval $[0, 1]$.
+We will denote by $CG_k$ the space of continuous Galerkin basis functions on triangles of degree $k$, $DG_k$ the discontinuous Galerkin basis, and $B_k$ the space of bubble functions.
+In the following, we'll consider a few different element families:
+\begin{enumerate}
+    \item MINI: $V_x^h = (CG_1 \oplus B_3)^2$, $Q_x^h = CG_1$
+    \item Taylor-Hood: $V_x^h = {CG_2}^2$, $Q_x^h = CG_1$
+    \item Crouzeix-Raviart: $V_x^h = (CG_2\oplus B_3)^2$, $Q_x^h = DG_1$
+\end{enumerate}
+All of these element pairs are stable for the 2D Stokes equations and, with appropriate choices of (1) the vertical spaces $V_z$, $Q_z$ and (2) the scalar extension spaces $S_z^h$ and $S_x^h$, we can apply Theorem \ref{thm:main-theorem}.
+
+When the vertical spaces is just the interval $[0, 1]$, the divergence operator reduces to just differentiation $\partial_z$.
+In that case, there is a $\partial_z$-compatible interpolation operator $\Pi_z^h$ for the vertical spaces $V_z^h = CG_{m + 1}$, $Q_z^h = DG_m$ for any polynomial degree $m$.
+(Note that the 1D Stokes equations as such are trivial; the divergence-free constraint in 1D forces all velocity solutions to be constant.
+We can still ask whether there are 1D discrete function spaces $V_z^h$, $Q_z^h$ for which there is a compatible interpolation operator for $\partial_z$.
+The existence of such discrete spaces and interpolation operators is all that matters.)
+
+The final ingredient is to pick the discrete space $S_z^h$ that we use to extend the horizontal velocities in the vertical and the discrete space $S_x^h$ that extends the vertical velocities in the horizontal.
+In the examples above -- MINI, Taylor-Hood, and Crouzeix-Raviart -- the velocity space can always be expressed as $V_x^h = K^2$ for some scalar space $K$.
+For simple velocity spaces like these, we can take
+\begin{align*}
+    S_x^h & = K \\
+    S_z^h & = V_z^h
+\end{align*}
+because elements of the space $V_z^h$ are scalar fields.
+Having made this choice, we then find that
+\begin{align*}
+    V^h & = (V_x^h\otimes S_z^h) \oplus (S_x^h \otimes V_z^h) \\
+    & = (K^2\otimes V_z^h) \oplus (K\otimes V_z^h) \\
+    & \cong (K \otimes V_z^h)^3.
+\end{align*}
+This choice trivially guarantees the existence of the projection operators of Assumption \ref{asm:ortho-projection}.
+We can thus assert the following
+\begin{cor} \label{cor:stable-pairs} The following elements are stable for the 3D Stokes problem on an extruded domain:
+    \begin{enumerate}
+        \item $V = ((CG_1 \oplus B_3) \otimes CG_{k + 1})^3$, $Q = CG_1\otimes DG_k$ 
+        \item $V = (CG_2 \otimes CG_{k + 1})^3$, $Q = CG_1\otimes DG_k$
+        \item $V = ((CG_2\oplus B_3) \otimes CG_{k + 1})^3$, $Q = DG_1\otimes DG_k$
+    \end{enumerate}
+\end{cor}
+
+Two final properties are worth noting.
+First, we have used $CG$ and $DG$ to denote the continuous and discontinuous Galerkin spaces.
+This notation presumes that we are using the usual Lagrange finite element bases, where the degrees of freedom are the values of the basis function at interpolation points.
+One can equivalently use the modal Gauss-Lobatto-Legendre (GLL) and Gauss-Legendre (GL) bases in the vertical direction, where the basis functions are mutually orthogonal.
+
+Second, observe that the pressure space for the Crouzeix-Raviart element in 2D contains the piecewise-constant functions.
+As a consequence, the velocity solution conserves mass element-wise.
+Devising inf-sup stable pairs for the 3D Stokes problem on arbitrary triangular meshes is much more difficult than in 2D.
+The pressure space for the last element pair in Corollory \ref{cor:stable-pairs}, defined by extruding the 2D Crouzeix-Raviart element into 3D, also has the desirable property of containing the piecewise constant functions.
+
+There are element families that do not have a simple expression as a product of scalar spaces.
+For example, \citet{cockburn2007note} discretize the velocities in the related Oseen problem using Raviart-Thomas elements, which makes the velocities exactly divergence-free.
+The Raviart-Thomas space cannot be expressed as a product of scalar spaces.
+
 
 \pagebreak
 
