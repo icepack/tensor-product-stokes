@@ -263,6 +263,47 @@ For example, \citet{cockburn2007note} discretize the velocities in the related O
 The Raviart-Thomas space cannot be expressed as a product of scalar spaces.
 
 
+
+% ----------------------
+\section{Demonstrations}
+
+The computational demonstrations in this section all use the Firedrake software package \citep{FiredrakeUserManual}.
+Firedrake includes built-in support for tensor product meshes and elements, as well as sophisticated loop optimizations such as sum-factorization that accelerate computations on extruded meshes \citep{mcrae2016automated}.
+
+\subsection{Empirical confirmation of inf-sup stability}
+
+Given a mesh of the spatial domain and a pair of discrete spaces $V^h$, $Q^h$, we can check empirically whether they satisfy the inf-sup condition by solving a generalized eigenvalue problem \citep{rognes2012automated}.
+This empirical check is not a substitute for a formal proof of inf-sup stability, but rather serves as a ``smoke test'' that our numerical implementation and our proofs are not obviously wrong.
+
+Let $M$ and $N$ be the Riesz representers for the canonical mapping from $V \to V^*$ and $Q \to Q^*$ respectively.
+Consider the following eigenproblem: find velocity-pressure pairs $u$, $p$ and scalars $\lambda$ such that
+\begin{align}
+    Mu + B^*p & = 0 \\
+    Bu & = -\lambda Np
+\end{align}
+The eigenvalues of this problem are all real and positive, and the square root of the smallest eigenvalue is equal to the inf-sup constant for $V^h$, $Q^h$ \citep{malkus1981eigenproblems}.
+We can form this eigenproblem in Firedrake and then call out to the SLEPc package to solve it \citep{hernandez2005slepc}.
+
+\subsection{Lid-driven cavity flow}
+
+\subsection{Flow around a cylinder}
+
+\subsection{Thin-film flow with terrain-following coordinates}
+
+The preceding examples considered cases where the spatial domain is equal to $\Omega \times [0, 1]$ for some footprint domain $\Omega$.
+Here we will consider a different case: the domain is the region between two smooth surfaces $b$ and $s$, respectively the bed and surface, that both map $\Omega$ to the reals, with the thickness $h = s - b$ always positive.
+Rather than solve on the physical domain, we can introduce the \emph{terrain-following coordinate}
+\begin{equation}
+    \zeta = \frac{z - b}{h}
+\end{equation}
+which now takes values in $[0, 1]$.
+The computational domain is then $\Omega \times [0, 1]$ but we need to introduce a metric tensor and alter the usual differential operators.
+
+
+
+% ------------------
+\section{Discussion}
+
 \pagebreak
 
 \bibliographystyle{plainnat}
