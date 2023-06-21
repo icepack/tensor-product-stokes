@@ -1,3 +1,12 @@
+## Checkpoint files
+*.h5
+
+
+## Meshes
+*.geo
+*.msh
+
+
 ## Figures
 *.png
 
