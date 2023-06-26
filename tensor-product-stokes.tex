@@ -97,8 +97,8 @@ Their proof of LBB-stability crucially relied on special properties of the Fouri
 \citet{nakahashi1989finite} studied prismatic elements for the Navier-Stokes equations but did not address LBB stability.
 
 We propose to use velocity and pressure spaces for the 3D problem that are fashioned out of stable elements for the 2D problem.
-Certain choices of basis for the 2D problem will work, like the MINI and Taylor-Hood elements.
-Other element families, such as Raviart-Thomas or Crouzeix-Raviart, cannot be easily adapted into tensor product elements on extruded domains.
+Certain choices of basis for the 2D problem will work, like the MINI, Taylor-Hood, and Crouzeix-Raviart elements.
+Other element families, such as Raviart-Thomas, cannot be easily adapted into tensor product elements on extruded domains.
 
 
 \section{Elements}
@@ -166,7 +166,7 @@ Now all the pieces are in place to complete our construction.
 \begin{equation}
     \Pi^h = R_x^*(\Pi_x^h\otimes\Psi_z^h)R_x + R_z^*(\Psi_x^h\otimes\Pi_z^h)R_z
 \end{equation}
-    is $B$-compatible interpolation operator if $B$ has the structure of equation \eqref{eq:b-decomposition} and Assumptions \ref{asm:b-compatible-operators} and \ref{asm:ortho-projection} hold.
+    is a $B$-compatible interpolation operator if $B$ has the structure of equation \eqref{eq:b-decomposition} and Assumptions \ref{asm:b-compatible-operators} and \ref{asm:ortho-projection} hold.
     \proof First, observe that $R_x^*R_x + R_z^*R_z = \Id_V$.
     We then have that
     \begin{equation}
@@ -218,7 +218,7 @@ In the following, we'll consider a few different element families:
 \end{enumerate}
 All of these element pairs are stable for the 2D Stokes equations and, with appropriate choices of (1) the vertical spaces $V_z$, $Q_z$ and (2) the scalar extension spaces $S_z^h$ and $S_x^h$, we can apply Theorem \ref{thm:main-theorem}.
 
-When the vertical spaces is just the interval $[0, 1]$, the divergence operator reduces to just differentiation $\partial_z$.
+When the vertical space is the interval $[0, 1]$, the divergence operator reduces to just differentiation $\partial_z$.
 In that case, there is a $\partial_z$-compatible interpolation operator $\Pi_z^h$ for the vertical spaces $V_z^h = CG_{m + 1}$, $Q_z^h = DG_m$ for any polynomial degree $m$.
 (Note that the 1D Stokes equations as such are trivial; the divergence-free constraint in 1D forces all velocity solutions to be constant.
 We can still ask whether there are 1D discrete function spaces $V_z^h$, $Q_z^h$ for which there is a compatible interpolation operator for $\partial_z$.
