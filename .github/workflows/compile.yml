@@ -1,0 +1,18 @@
+name: 'Compile and upload document'
+on: [push]
+jobs:
+  build_latex:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/icepack/tensor-product-stokes:0.0.1
+      options: --user root
+    steps:
+      - name: Check out git repository
+        uses: actions/checkout@v3
+      - name: Compile TeX document
+        run: make
+      - name: Upload PDF file
+        uses: actions/upload-artifact@v3
+        with:
+          name: tensor-product-stokes
+          path: tensor-product-stokes.pdf
