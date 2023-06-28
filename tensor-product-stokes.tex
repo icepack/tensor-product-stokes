@@ -288,6 +288,27 @@ We can form this eigenproblem in Firedrake and then call out to the SLEPc packag
 
 \subsection{Flow around a cylinder}
 
+The footprint domain for this problem is the rectangle $[-L_x, +L_x] \times [-L_y, +L_y]$ with a circle of radius $R$ centered at the point $(0, \ell_y)$ removed.
+The footprint is extruded to a depth of 1.
+We set the pressure to be equal to 1 along the inflow boundary $y = -L_y$ and equal to 0 along the outflow obundary $y = +L_y$.
+On the top, bottom, side walls, and cylindrical exclusion, we enforce no-slip boundary conditions on the velocity.
+The results are shown in Figure \ref{fig:cylinder-flow}.
+
+\begin{figure}
+    \begin{center}
+        \includegraphics[width=0.6\linewidth]{demo/flow-around-cylinder/cylinder_flow.pdf}
+    \end{center}
+    \caption{Mesh for flow around cylinder problem (left) and quiver plot of the depth-averaged velocity field (right).}
+    \label{fig:cylinder-flow}
+\end{figure}
+
+As a smoke test, we evaluate the total flux of material into and out of the domain.
+The sum of the influx and outflux should be zero for an incompressible fluid.
+The relative error between the total flux and the influx for different element choices is shown in \textcolor{red}{add a table}.
+The extruded Crouzeix-Raviart element has a much smaller relative flux error than the MINI and Taylor-Hood elements.
+The Crouzeix-Raviart pressure space is discontinuous and therefore preserves mass element-wise rather than only in a global sense.
+Nonetheless, there is no reason a priori why it should also have much lower global flux error than the alternatives \textcolor{red}{or is there?}
+
 \subsection{Thin-film flow with terrain-following coordinates}
 
 The preceding examples considered cases where the spatial domain is equal to $\Omega \times [0, 1]$ for some footprint domain $\Omega$.

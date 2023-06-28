@@ -1,4 +1,6 @@
-all: mini.h5 taylor-hood.h5 crouzeix-raviart.h5
+
+cylinder_flow.pdf: crouzeix-raviart.h5
+	python make_plots.py --input $< --output $@
 
 mini.h5: cylinder_flow.py
 	python cylinder_flow.py --element mini --output $@
