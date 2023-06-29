@@ -1,5 +1,6 @@
-## Checkpoint files
+## Output files
 *.h5
+*.json
 
 
 ## Meshes

@@ -272,9 +272,16 @@ Firedrake includes built-in support for tensor product meshes and elements, as w
 
 \subsection{Empirical confirmation of inf-sup stability}
 
-Given a mesh of the spatial domain and a pair of discrete spaces $V^h$, $Q^h$, we can check empirically whether they satisfy the inf-sup condition by solving a generalized eigenvalue problem \citep{rognes2012automated}.
-This empirical check is not a substitute for a formal proof of inf-sup stability, but rather serves as a ``smoke test'' that our numerical implementation and our proofs are not obviously wrong.
+\begin{figure}
+    \begin{center}
+        \includegraphics[width=0.6\linewidth]{demo/lbb-stability/results-2d.pdf}
+    \end{center}
+    \caption{Empirical inf-sup constants for the three 2D element families on the unit square as the mesh is refined.
+    These elements are known to stable for the 2D Stokes problem.}
+    \label{fig:empirical-lbb-2d}
+\end{figure}
 
+Given a mesh of the spatial domain and a pair of discrete spaces $V^h$, $Q^h$, we can check empirically whether they satisfy the inf-sup condition by solving a generalized eigenvalue problem \citep{rognes2012automated}.
 Let $M$ and $N$ be the Riesz representers for the canonical mapping from $V \to V^*$ and $Q \to Q^*$ respectively.
 Consider the following eigenproblem: find velocity-pressure pairs $u$, $p$ and scalars $\lambda$ such that
 \begin{align}
@@ -283,6 +290,12 @@ Consider the following eigenproblem: find velocity-pressure pairs $u$, $p$ and s
 \end{align}
 The eigenvalues of this problem are all real and positive, and the square root of the smallest eigenvalue is equal to the inf-sup constant for $V^h$, $Q^h$ \citep{malkus1981eigenproblems}.
 We can form this eigenproblem in Firedrake and then call out to the SLEPc package to solve it \citep{hernandez2005slepc}.
+This empirical check is not a substitute for a formal proof of inf-sup stability, but rather serves as a ``smoke test'' that our numerical implementation and our proofs are not obviously wrong.
+
+We performed the empirical inf-sup stability check using the unit square as our footprint domain, with a mesh spacing starting at 1/4 and going down to 1/32.
+Figure \ref{fig:empirical-lbb-2d} shows the results for 2D elements which we know to be inf-sup stable.
+\textcolor{red}{Do the 3D elements.}
+
 
 \subsection{Lid-driven cavity flow}
 
