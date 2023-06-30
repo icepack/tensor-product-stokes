@@ -95,10 +95,14 @@ This latter condition is another way of saying that $B^*$ has a bounded inverse 
 \citet{canuto1984combined} established the LBB-stability of a basis using the tensor product of the MINI element in the horizontal direction and a Fourier basis with an equal number of modes for the velocity and pressure in the vertical direction.
 Their proof of LBB-stability crucially relied on special properties of the Fourier basis and does not generalize to other element families.
 \citet{nakahashi1989finite} studied prismatic elements for the Navier-Stokes equations but did not address LBB stability.
+\citet{isaac2015solution} explored higher-order elements and multigrid solvers for the Stokes equations in very anisotropic domains.
+This work used equal polynomial degree in the vertical and horizontal for the velocity space.
 
 We propose to use velocity and pressure spaces for the 3D problem that are fashioned out of stable elements for the 2D problem.
-Certain choices of basis for the 2D problem will work, like the MINI, Taylor-Hood, and Crouzeix-Raviart elements.
-Other element families, such as Raviart-Thomas, cannot be easily adapted into tensor product elements on extruded domains.
+Certain choices of 2D basis will give a stable and conforming basis for the 3D problem, like the MINI, Taylor-Hood, and Crouzeix-Raviart elements.
+This list is not exhaustive and other elements may be amenable to our approach.
+\textcolor{red}{Do we want to try RT or other $H(\text{div})$ elements?}
+Our approach differs from that of \citet{isaac2015solution} in our use of higher degree polynomials in the vertical direction than in the horizontal.
 
 
 \section{Elements}
