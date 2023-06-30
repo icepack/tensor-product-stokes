@@ -59,7 +59,7 @@ def run(*, dimension, num_cells, element, num_layers=None, vdegree=None):
         velocity_element = cg_2 + b_3
         pressure_element = firedrake.FiniteElement("DG", "triangle", 1)
 
-    elif dimension == 3:
+    if dimension == 3:
         cg_z = firedrake.FiniteElement("CG", "interval", vdegree)
         dg_z = firedrake.FiniteElement("DG", "interval", vdegree - 1)
         velocity_element = firedrake.TensorProductElement(velocity_element, cg_z)
