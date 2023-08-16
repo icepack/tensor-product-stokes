@@ -9,7 +9,7 @@ results-2d.json: lbb-stability.py
 
 results-3d.json: lbb-stability.py
 	@for element in mini taylor-hood crouzeix-raviart; do		\
-		for num-layers in 1 2 3; do 				\
+		for num_layers in 1 2 3; do 				\
 			for vdegree in 1 2 3 4; do 			\
 				python lbb-stability.py 		\
 					--dimension 3 			\
@@ -17,7 +17,7 @@ results-3d.json: lbb-stability.py
 					--num-cells-min 4 		\
 					--num-cells-max 32 		\
 					--num-cells-step 2 		\
-					--num-layers $$num-layers	\
+					--num-layers $$num_layers	\
 					--vdegree $$vdegree 		\
 					--output $@ ; 			\
 			done						\

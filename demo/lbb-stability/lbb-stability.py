@@ -100,6 +100,9 @@ args = parser.parse_args()
 
 stability_constants = []
 nmin, nmax, nstep = args.num_cells_min, args.num_cells_max, args.num_cells_step
+print(f"Element: {args.element}")
+print(f"#layers: {args.num_layers}")
+print(f"vdegree: {args.vdegree}")
 for num_cells in range(nmin, nmax + 1, nstep):
     h, λ = run(
         dimension=args.dimension,
